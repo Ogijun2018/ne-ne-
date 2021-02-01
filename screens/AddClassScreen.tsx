@@ -6,24 +6,21 @@ import {
   FlatList,
   Text,
   TouchableOpacity,
+  Alert,
+  SafeAreaView,
 } from 'react-native';
-import { setNewCollection, getClasses } from '../lib/firebase';
+import { setNewCollection, set as firebaseSet } from '../lib/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as firebase from 'firebase';
 import 'firebase/firestore';
 import 'firebase/auth';
 import { KeyboardAwareSectionList } from 'react-native-keyboard-aware-scroll-view';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function AddClassScreen({ navigation }) {
-  const days = [
-    '日曜日',
-    '月曜日',
-    '火曜日',
-    '水曜日',
-    '木曜日',
-    '金曜日',
-    '土曜日',
-  ];
+  const days = ['日曜', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜'];
   const [classes, setClasses] = useState();
+  const isFocused = useIsFocused();
   const getClasses = async () => {
     // 電気通信大学のところは自分がプロフィールに設定している大学名が入る
     // テスト環境として変更する
@@ -44,12 +41,34 @@ export default function AddClassScreen({ navigation }) {
       setClasses(list);
     });
   };
+
+  const addClass = async (item) => {
+    const uid = await AsyncStorage.getItem('uid');
+    const ref = `/users/${uid}/classes/${item.roomId}/`;
+    const result = await firebaseSet(ref, item);
+    if (!result.success) {
+      Alert.alert('科目の登録に失敗しました。');
+    } else {
+      navigation.navigate('NewClassNavigator');
+    }
+  };
+
   useEffect(() => {
     getClasses();
-  }, []);
+  }, [isFocused]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <Text
+        style={{
+          fontWeight: 'bold',
+          fontSize: 35,
+          alignSelf: 'flex-start',
+          padding: 25,
+        }}
+      >
+        Add Classes
+      </Text>
       <FlatList
         style={{ width: '100%' }}
         data={classes}
@@ -69,13 +88,14 @@ export default function AddClassScreen({ navigation }) {
                 marginHorizontal: 20,
               }}
               onPress={() => {
-                console.log('aaa');
+                addClass(item);
               }}
             >
               <Text
                 style={{ fontSize: 18, color: 'white', fontWeight: 'bold' }}
               >
-                {item.schoolName} {days[item.day]} {item.time}限 {item.name}
+                {item.schoolName} {days[item.day]}
+                {item.time}限 {item.name}
               </Text>
             </TouchableOpacity>
           );
@@ -89,26 +109,26 @@ export default function AddClassScreen({ navigation }) {
           position: 'absolute',
           right: 30,
           bottom: 20,
-          width: 60,
+          width: 150,
           height: 60,
         }}
       >
         <View
           style={{
             borderRadius: 100,
-            width: 60,
+            width: 150,
             height: 60,
             backgroundColor: '#89D9F9',
             justifyContent: 'center',
             alignItems: 'center',
           }}
         >
-          <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 30 }}>
-            ＋
+          <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 20 }}>
+            新規追加
           </Text>
         </View>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -116,6 +136,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 100,
   },
 });

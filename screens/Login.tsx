@@ -1,6 +1,12 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, Text, View, Alert } from 'react-native';
-import TextInput from '../components/atoms/TextInput';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  View,
+  Alert,
+  TextInput,
+} from 'react-native';
 import { login as firebaseLogin } from '../lib/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -10,25 +16,59 @@ export default function InitializeLogin({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize: 20, fontWeight: 'bold' }}>ログイン</Text>
+      <View style={{ paddingBottom: 50 }}>
+        <Text
+          style={{
+            fontWeight: 'bold',
+            fontSize: 35,
+            alignSelf: 'center',
+            padding: 30,
+          }}
+        >
+          Log in!
+        </Text>
+      </View>
       <TextInput
         onChangeText={(text) => onChangeEmail(text)}
         value={email}
-        label="メールアドレス"
-        placeholder="Email"
+        placeholder="メールアドレス（必須）"
+        style={styles.textInputStyle}
       />
       <TextInput
         onChangeText={(text) => onChangePass(text)}
         value={password}
-        label="パスワード"
-        placeholder="password"
+        placeholder="パスワード（必須）"
+        style={styles.textInputStyle}
+        secureTextEntry={true}
       />
-
       <TouchableOpacity
-        style={styles.submitButton}
-        onPress={() => loginUser(navigation, email, password)}
+        style={{
+          width: '75%',
+          height: 60,
+          backgroundColor: '#2f95dc',
+          justifyContent: 'center',
+          borderRadius: 50,
+          margin: 10,
+        }}
+        onPress={() => {
+          if (email === '' || password === '') {
+            Alert.alert('メールアドレスとパスワードを確認してください');
+
+            return;
+          }
+          loginUser(navigation, email, password);
+        }}
       >
-        <Text>Login</Text>
+        <Text
+          style={{
+            fontWeight: 'bold',
+            color: 'white',
+            alignSelf: 'center',
+            fontSize: 20,
+          }}
+        >
+          Log in
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -41,7 +81,6 @@ async function loginUser(navigation, email, password) {
     await AsyncStorage.setItem('uid', result.user.uid);
     navigation.navigate('Root');
   } else {
-    console.log(result);
     Alert.alert(
       'ログインに失敗しました。 \n メールアドレスとパスワードを確認してください。',
     );
@@ -55,6 +94,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingTop: 100,
+    alignItems: 'center',
+  },
+  textInputStyle: {
+    marginBottom: 20,
+    borderWidth: 1,
+    width: '75%',
+    height: 40,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    paddingLeft: 10,
   },
   developmentModeText: {
     marginBottom: 20,

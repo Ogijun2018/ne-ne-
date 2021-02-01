@@ -5,8 +5,10 @@ import {
   Text,
   ScrollView,
   Alert,
+  View,
+  TextInput,
 } from 'react-native';
-import TextInput from '../components/atoms/TextInput';
+// import TextInput from '../components/atoms/TextInput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signup as firebaseSignup, set as firebaseSet } from '../lib/firebase';
 
@@ -19,49 +21,76 @@ export default function InitializeWelcome({ navigation }) {
   const [password, onChangePass] = React.useState('');
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={{ fontSize: 20, fontWeight: 'bold' }}>プロフィール登録</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={{ paddingBottom: 50 }}>
+        <Text
+          style={{
+            fontWeight: 'bold',
+            fontSize: 35,
+            alignSelf: 'center',
+            padding: 30,
+          }}
+        >
+          Sign Up!
+        </Text>
+        <Text style={{ fontSize: 15 }}>
+          あなたのプロフィールを教えてください
+        </Text>
+      </View>
       <TextInput
         onChangeText={(text) => onChangeName(text)}
         autoFocus
-        label="あなたのニックネームを教えてください"
         placeholder="ニックネーム"
         value={name}
+        style={styles.textInputStyle}
       />
       <TextInput
         onChangeText={(text) => onChangeSchool(text)}
         value={school}
-        label="あなたの学校を教えてください"
         placeholder="学校名"
+        style={styles.textInputStyle}
       />
       <TextInput
         onChangeText={(text) => onChangeBelong(text)}
         value={belong}
-        label="あなたの学校の所属を教えてください"
         placeholder="学部/専攻名"
+        style={styles.textInputStyle}
       />
       <TextInput
         onChangeText={(text) => onChangeSnsAccount(text)}
         value={snsAccount}
-        label="あなたのSNSアカウントを教えてください"
         placeholder="SNSアカウント"
+        style={styles.textInputStyle}
       />
       <TextInput
         onChangeText={(text) => onChangeEmail(text)}
         value={email}
-        label="あなたのメールアドレスを教えてください"
-        placeholder="Email"
+        placeholder="メールアドレス（必須）"
+        style={styles.textInputStyle}
       />
       <TextInput
         onChangeText={(text) => onChangePass(text)}
         value={password}
-        label="パスワードを設定してください"
-        placeholder="パスワード"
+        placeholder="パスワード（必須）"
+        style={styles.textInputStyle}
+        secureTextEntry={true}
       />
 
       <TouchableOpacity
-        style={styles.submitButton}
-        onPress={() =>
+        style={{
+          width: '75%',
+          height: 60,
+          backgroundColor: '#2f95dc',
+          justifyContent: 'center',
+          borderRadius: 50,
+          margin: 10,
+        }}
+        onPress={() => {
+          if (email === '' || password === '') {
+            Alert.alert('メールアドレスとパスワードを確認してください');
+
+            return;
+          }
           registUser(
             navigation,
             name,
@@ -70,10 +99,19 @@ export default function InitializeWelcome({ navigation }) {
             snsAccount,
             email,
             password,
-          )
-        }
+          );
+        }}
       >
-        <Text>OK!</Text>
+        <Text
+          style={{
+            fontWeight: 'bold',
+            color: 'white',
+            alignSelf: 'center',
+            fontSize: 20,
+          }}
+        >
+          OK!
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -89,7 +127,6 @@ async function registUser(
   password,
 ) {
   const result = await firebaseSignup(email, password);
-  console.log(result.user.uid);
   if (result.success) {
     await firebaseSet(`/users/${result.user.uid}`, {
       name,
@@ -108,9 +145,18 @@ async function registUser(
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    height: '110%',
     backgroundColor: '#fff',
-    // paddingTop: 100,
+    alignItems: 'center',
+  },
+  textInputStyle: {
+    marginBottom: 20,
+    borderWidth: 1,
+    width: '75%',
+    height: 40,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    paddingLeft: 10,
   },
   developmentModeText: {
     marginBottom: 20,

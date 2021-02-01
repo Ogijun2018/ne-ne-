@@ -5,9 +5,11 @@ import {
   Text,
   View,
   TextInput,
+  Alert,
 } from 'react-native';
 import { set as firebaseSet, generateClassRoomId } from '../lib/firebase';
 import { Picker } from '@react-native-picker/picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function RegistClassScreen({ navigation }) {
   const [schoolName, onChangeSchoolName] = useState('電気通信大学');
@@ -104,6 +106,7 @@ export default function RegistClassScreen({ navigation }) {
 async function registNewClass(navigation, schoolName, day, time, name) {
   // roomIdをここで作成
   // すでに同じ名前の授業がないかも判定した方が良い
+  // 新しくクラスを作成すると同時にホーム画面にも科目を追加する
   const roomId = generateClassRoomId();
   await firebaseSet(`/classes/${roomId}/`, {
     schoolName,
@@ -112,7 +115,22 @@ async function registNewClass(navigation, schoolName, day, time, name) {
     name,
     roomId,
   });
-  navigation.navigate('MainHomeScreen');
+  const uid = await AsyncStorage.getItem('uid');
+  const ref = `/users/${uid}/classes/${roomId}/`;
+  const result = await firebaseSet(ref, {
+    day,
+    key: roomId,
+    time,
+    roomId,
+    schoolName,
+    name,
+  });
+  if (!result.success) {
+    Alert.alert('科目の登録に失敗しました。');
+  } else {
+    navigation.navigate('MainHomeScreen');
+  }
+  // navigation.navigate('NewClassNavigator');
 }
 
 const styles = StyleSheet.create({

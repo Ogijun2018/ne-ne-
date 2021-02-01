@@ -1,86 +1,125 @@
-/* eslint-disable */
-import { HeaderTitle } from '@react-navigation/stack';
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, Text, View, Button } from 'react-native';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  View,
+  SafeAreaView,
+} from 'react-native';
 import { Classes } from '../types/classes';
 import * as firebase from 'firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FlatList } from 'react-native-gesture-handler';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function MainHome({ navigation }: { navigation: any }, ref) {
-  const [userId, setUserId] = useState<string | undefined>();
+  const [classes, setClasses] = useState();
+  const isFocused = useIsFocused();
+  const days = ['日曜', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜'];
+  const getClasses = async () => {
+    const uid = await AsyncStorage.getItem('uid');
+    const ref = `/users/${uid}/classes/`;
+    const list = [];
+    await firebase
+      .database()
+      .ref(ref)
+      .once('value', (snapshot) => {
+        snapshot.forEach((child) => {
+          list.push({
+            key: child.key,
+            name: child.val().name,
+            roomId: child.val().roomId,
+            schoolName: child.val().schoolName,
+            day: child.val().day,
+            time: child.val().time,
+          });
+        });
+        setClasses(list);
+      });
+  };
 
-  // const getClasses = async (userId: string) => {
-  //     const classes = [] as Classes[];
-  //     const query = await firebase.database().ref(ref).orderByKey();
-  // };
-
-  // const signin = async () => {
-  //     const uid = await getUserId();
-  //     setUserId(uid);
-  // };
-
-  // useEffect(() => {
-      // signin();
-      // getClasses(userId);
-  // }, []);
+  useEffect(() => {
+    getClasses();
+  }, [isFocused]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Main Home Screen</Text>
-      <Button
-        title="線形代数学第一"
-        onPress={() => {
-          navigation.navigate('ChatNavigator', {
-            screen: 'ChatScreen',
-            params: {
-              roomId: 'room1',
-              roomName: '線形代数第一',
-            },
-          });
+    <SafeAreaView style={styles.container}>
+      <Text
+        style={{
+          fontWeight: 'bold',
+          fontSize: 35,
+          alignSelf: 'flex-start',
+          padding: 25,
+        }}
+      >
+        Home
+      </Text>
+      <FlatList
+        style={{ width: '100%' }}
+        data={classes}
+        keyExtractor={(item) => item.key}
+        renderItem={({ item }) => {
+          return (
+            <TouchableOpacity
+              style={{
+                borderWidth: 1,
+                borderRadius: 5,
+                borderColor: '#33A3F2',
+                backgroundColor: '#2f95dc',
+                height: 50,
+                justifyContent: 'center',
+                paddingLeft: 10,
+                marginVertical: 5,
+                marginHorizontal: 20,
+              }}
+              onPress={() => {
+                navigation.navigate('ChatNavigator', {
+                  screen: 'ChatScreen',
+                  params: {
+                    roomId: item.roomId,
+                    roomName: item.name,
+                  },
+                });
+              }}
+            >
+              <Text
+                style={{ fontSize: 18, color: 'white', fontWeight: 'bold' }}
+              >
+                {item.schoolName} {days[item.day]}
+                {item.time}限 {item.name}
+              </Text>
+            </TouchableOpacity>
+          );
         }}
       />
-      <Button
-        title="微分積分学第一"
-        onPress={() => {
-          navigation.navigate('ChatNavigator', {
-            screen: 'ChatScreen',
-            params: {
-              roomId: 'room2',
-              roomName: '微分積分学第一',
-            },
-          });
-        }}
-      />
-      <Button
-        title="物理学概論第一"
-        onPress={() => {
-          navigation.navigate('ChatNavigator', {
-            screen: 'ChatScreen',
-            params: {
-              roomId: 'room3',
-              roomName: '物理学概論第一',
-            },
-          });
-        }}
-      />
-      <Button
-        title="Academic Spoken English"
-        onPress={() => {
-          navigation.navigate('ChatNavigator', {
-            screen: 'ChatScreen',
-            params: {
-              roomId: 'room4',
-              roomName: 'Academic Spoken English',
-            },
-          });
-        }}
-      />
-      <Button
-        title="新しい講義を追加する"
+      <TouchableOpacity
         onPress={() => {
           navigation.navigate('NewClassNavigator');
         }}
-      />
-    </View>
+        style={{
+          position: 'absolute',
+          right: 30,
+          bottom: 20,
+          width: 60,
+          height: 60,
+        }}
+      >
+        <View
+          style={{
+            borderRadius: 100,
+            width: 60,
+            height: 60,
+            backgroundColor: '#89D9F9',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 30 }}>
+            ＋
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 }
 
@@ -93,10 +132,5 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
   },
 });

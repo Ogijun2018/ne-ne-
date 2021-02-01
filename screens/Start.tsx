@@ -21,35 +21,38 @@ export default function InitializeStart({ navigation }) {
   return (
     <View style={styles.containerStyle}>
       <View style={styles.topSectionStyle}>
-        <View style={styles.topSectionInnerStyle}>
-          <View style={styles.topSectionLineStyle}></View>
-          <Text style={styles.topSectionSubTextStyle}>
-            隣の人に「ねぇねぇ」できる！
-          </Text>
-          <Text style={styles.topSectionMainTextStyle}>ne-ne-</Text>
-        </View>
+        <Text style={styles.topSectionSubTextStyle}>
+          「ねぇねぇ」から始まるコミュニケーション
+        </Text>
+        <Text style={styles.topSectionMainTextStyle}>ne-ne-</Text>
       </View>
 
       <View style={styles.buttonSectionStyle}>
         <TouchableOpacity
           style={{
-            width: '50%',
-            height: 100,
-            backgroundColor: 'red',
+            width: '75%',
+            height: 60,
+            backgroundColor: '#2f95dc',
+            justifyContent: 'center',
+            borderRadius: 50,
+            margin: 10,
           }}
           onPress={() => navigation.navigate('InitializeWelcome')}
         >
-          <Text style={{ color: 'white' }}>新規登録</Text>
+          <Text style={styles.buttonStyle}>新規登録</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={{
-            width: '50%',
-            height: 100,
-            backgroundColor: 'gray',
+            width: '75%',
+            height: 60,
+            backgroundColor: '#a9a9a9',
+            justifyContent: 'center',
+            borderRadius: 50,
+            margin: 10,
           }}
           onPress={() => navigation.navigate('InitializeLogin')}
         >
-          <Text>ログイン</Text>
+          <Text style={styles.buttonStyle}>ログイン</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -62,87 +65,45 @@ const constants = {
 
 const styles = StyleSheet.create({
   containerStyle: {
-    // paddingTop: Layouts.APP_PADDING_TOP,
     width: '100%',
     height: '100%',
-    // backgroundColor: Colors.orange,
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-between',
   },
 
   topSectionStyle: {
     width: '100%',
-    height: constants.TOP_SECTION_HEIGHT,
     display: 'flex',
-    flexDirection: 'column',
+    flex: 1,
     alignItems: 'center',
-    // backgroundColor: Colors.orange,
-  },
-  topSectionInnerStyle: {
-    // padding: 4,
-    height: constants.TOP_SECTION_HEIGHT - 8,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundColor: Colors.white,
-  },
-
-  topSectionLineStyle: {
-    position: 'absolute',
-    width: '100%',
-    flexDirection: 'row',
     justifyContent: 'center',
-    // height: 4,
-    top: 112,
-    // left: 162,
   },
   topSectionSubTextStyle: {
-    position: 'absolute',
     width: '100%',
-    top: 66,
     fontSize: 20,
     textAlign: 'center',
     color: Colors.textDarkGray,
-    backgroundColor: 'transparent',
   },
   topSectionMainTextStyle: {
-    position: 'absolute',
     width: '100%',
-    top: 139,
-    fontSize: 42,
+    fontSize: 50,
     textAlign: 'center',
-    // color: Colors.orange,
-    backgroundColor: 'transparent',
+    fontWeight: 'bold',
   },
-  topSectionLogoStyle: {
-    paddingTop: 15,
-    height: 200,
-    width: 200,
-    top: 241,
-    borderRadius: 100,
-    backgroundColor: Colors.orange,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  logoStyle: {
-    width: 160,
-    height: 160,
-  },
-
   buttonSectionStyle: {
-    paddingBottom: 119,
     display: 'flex',
-    flexDirection: 'row',
+    flex: 1,
+    flexDirection: 'column',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonSectionButtonStyle: {
     width: 290,
   },
   buttonStyle: {
-    width: 290,
-    height: 160,
-    backgroundColor: 'red',
+    fontWeight: 'bold',
+    color: 'white',
+    alignSelf: 'center',
+    fontSize: 20,
   },
 });

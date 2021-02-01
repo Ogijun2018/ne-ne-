@@ -96,7 +96,7 @@ const NewClassNavigator = () => (
     <NewClassStack.Screen
       name="AddClassScreen"
       component={AddClassScreen}
-      options={{ headerTitle: '既存のクラス選択画面' }}
+      options={{ headerTitle: '' }}
     />
     <NewClassStack.Screen
       name="RegistClassScreen"

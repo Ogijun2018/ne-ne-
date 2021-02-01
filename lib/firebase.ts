@@ -136,7 +136,6 @@ export const once = (ref) => {
     .ref(ref)
     .once('value')
     .then((snapshot) => {
-      // console.log("result", snapshot.val());
       return { value: snapshot.val() };
     })
     .catch((error) => {
