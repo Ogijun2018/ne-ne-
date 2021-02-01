@@ -19,15 +19,15 @@ export default function MainHome({ navigation }: { navigation: any }, ref) {
   // };
 
   // useEffect(() => {
-  //     signin();
-  //     getClasses(userId);
+      // signin();
+      // getClasses(userId);
   // }, []);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Main Home Screen</Text>
       <Button
-        title="講義室1"
+        title="線形代数学第一"
         onPress={() => {
           navigation.navigate('ChatNavigator', {
             screen: 'ChatScreen',
@@ -39,7 +39,7 @@ export default function MainHome({ navigation }: { navigation: any }, ref) {
         }}
       />
       <Button
-        title="講義室2"
+        title="微分積分学第一"
         onPress={() => {
           navigation.navigate('ChatNavigator', {
             screen: 'ChatScreen',
@@ -51,7 +51,7 @@ export default function MainHome({ navigation }: { navigation: any }, ref) {
         }}
       />
       <Button
-        title="講義室3"
+        title="物理学概論第一"
         onPress={() => {
           navigation.navigate('ChatNavigator', {
             screen: 'ChatScreen',
@@ -63,7 +63,7 @@ export default function MainHome({ navigation }: { navigation: any }, ref) {
         }}
       />
       <Button
-        title="講義室4"
+        title="Academic Spoken English"
         onPress={() => {
           navigation.navigate('ChatNavigator', {
             screen: 'ChatScreen',

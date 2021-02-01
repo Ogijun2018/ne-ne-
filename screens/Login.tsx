@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, Text, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, Text, View, Alert } from 'react-native';
 import TextInput from '../components/atoms/TextInput';
 import { login as firebaseLogin } from '../lib/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function InitializeLogin({ navigation }) {
   const [email, onChangeEmail] = React.useState('');
@@ -34,8 +35,19 @@ export default function InitializeLogin({ navigation }) {
 }
 
 async function loginUser(navigation, email, password) {
-  await firebaseLogin(email, password);
-  navigation.navigate('Root');
+  const result = await firebaseLogin(email, password);
+  if (result.success) {
+    console.log('login!', result.user.uid);
+    await AsyncStorage.setItem('uid', result.user.uid);
+    navigation.navigate('Root');
+  } else {
+    console.log(result);
+    Alert.alert(
+      'ログインに失敗しました。 \n メールアドレスとパスワードを確認してください。',
+    );
+
+    return;
+  }
 }
 
 const styles = StyleSheet.create({

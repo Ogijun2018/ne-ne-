@@ -84,7 +84,7 @@ const ChatNavigator = () => (
     <ChatStack.Screen
       name="UserInfoScreen"
       component={UserInfoScreen}
-      options={{ headerTitle: 'ユーザー詳細画面' }}
+      options={{ headerTitle: 'ユーザー詳細' }}
     />
   </ChatStack.Navigator>
 );
@@ -101,7 +101,7 @@ const NewClassNavigator = () => (
     <NewClassStack.Screen
       name="RegistClassScreen"
       component={RegistClassScreen}
-      options={{ headerTitle: '新しいコレクションを作成する画面' }}
+      options={{ headerTitle: '新規科目登録' }}
     />
   </NewClassStack.Navigator>
 );

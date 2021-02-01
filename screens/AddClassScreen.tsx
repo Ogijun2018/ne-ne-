@@ -6,6 +6,7 @@ import { setNewCollection, getClasses } from '../lib/firebase';
 import * as firebase from 'firebase';
 import 'firebase/firestore';
 import 'firebase/auth';
+import { KeyboardAwareSectionList } from 'react-native-keyboard-aware-scroll-view';
 
 export default function AddClassScreen({ navigation }) {
   const [classes, setClasses] = useState('');
@@ -18,27 +19,35 @@ export default function AddClassScreen({ navigation }) {
     // Attach an asynchronous callback to read the data at our posts reference
     ref.once(
       'value',
-      function (snapshot) {
-        console.log('----------------');
-        snapshot.forEach((ObjectPerDay) => {
-          ObjectPerDay.forEach((ObjectPerTime) => {
-            ObjectPerTime.forEach((ObjectPerClass) => {
-              const sample = ObjectPerClass.val();
-              console.log(sample.name, sample.roomId);
-              setClasses(sample.name);
-              setClassRoomId(sample.roomId);
-              console.log('=======');
-            });
-          });
+      (snapshot) => {
+        const classes = [];
+        const keys = [];
+        snapshot.forEach((item) => {
+          const itemVal = item.val();
+          keys.push(itemVal);
         });
+        for (let i = 0; i < keys.length; i++) {
+          console.log(keys[i]);
+        }
+        // snapshot.forEach((ObjectPerDay) => {
+        //   ObjectPerDay.forEach((ObjectPerTime) => {
+        //     ObjectPerTime.forEach((ObjectPerClass) => {
+        //       const sample = ObjectPerClass.val();
+        //       console.log(sample.name, sample.roomId);
+        //       setClasses(sample.name);
+        //       setClassRoomId(sample.roomId);
+        //       console.log('=======');
+        //     });
+        //   });
+        // });
       },
-      function (errorObject) {
-        console.log('The read failed: ' + errorObject.code);
-      },
+      // function (errorObject) {
+      //   console.log('The read failed: ' + errorObject.code);
+      // },
     );
   };
   useEffect(() => {
-    console.log('useEffect');
+    // console.log('useEffect');
     getClasses();
   }, []);
 

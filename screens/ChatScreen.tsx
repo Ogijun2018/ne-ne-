@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Text,
   StyleSheet,
@@ -16,13 +16,22 @@ import {
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { RFPercentage } from 'react-native-responsive-fontsize';
-import firebase from 'firebase';
-import { getMessageRef, getUserId, getUserPositionRef } from '../lib/firebase';
+import firebase, { database } from 'firebase';
+import {
+  getMessageRef,
+  getUserId,
+  getUserPositionRef,
+  remove,
+} from '../lib/firebase';
 import { Position } from '../types/message';
+import { useIsFocused } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const ITEM_WIDTH = Dimensions.get('window').width;
 
 export default function ChatScreen({ route, navigation }) {
   const { roomId, roomName } = route.params;
+  const isFocused = useIsFocused();
+  const intervalRef = useRef(null);
   const [stateSeats, setSeats] = useState([]);
   const [myPlace, setMyPlace] = useState([]);
   const [text, setText] = useState<string>('');
@@ -64,6 +73,7 @@ export default function ChatScreen({ route, navigation }) {
       const newMessage = {
         createdAt: Date.now(),
         text: value,
+        chatVisible: true,
       };
       await docRef.update(newMessage);
       setText('');
@@ -90,6 +100,7 @@ export default function ChatScreen({ route, navigation }) {
             x: keys[i].x,
             y: keys[i].y,
             createdAt: keys[i].createdAt,
+            chatVisible: keys[i].chatVisible,
           });
         }
         // Deep copy
@@ -101,6 +112,7 @@ export default function ChatScreen({ route, navigation }) {
               seat.text = param.text;
               seat.userId = param.userId;
               seat.createdAt = param.createdAt;
+              seat.chatVisible = param.chatVisible;
             }
           });
         });
@@ -133,10 +145,37 @@ export default function ChatScreen({ route, navigation }) {
     }
   };
 
+  const handleChatVisible = async (roomId: string) => {
+    await firebase
+      .database()
+      .ref('rooms/' + roomId + '/position/')
+      .once('value', (snapshot) => {
+        const keys = [];
+        snapshot.forEach((item) => {
+          const itemVal = item.val();
+          keys.push(itemVal);
+        });
+        for (let i = 0; i < keys.length; i++) {
+          if (
+            keys[i].createdAt &&
+            keys[i].chatVisible &&
+            keys[i].createdAt + 5000 <= Date.now()
+          ) {
+            const updatedData = {
+              chatVisible: false,
+            };
+            firebase
+              .database()
+              .ref('rooms/' + roomId + '/position/' + keys[i].userId + '/')
+              .update(updatedData);
+          }
+        }
+      });
+  };
+
   const signin = async () => {
-    const uid = await getUserId();
+    const uid = await AsyncStorage.getItem('uid');
     setUserId(uid);
-    sendUserPosition(roomId, { x: 2, y: 2 }, userId);
   };
 
   const levelingChatText = (text) => {
@@ -161,7 +200,17 @@ export default function ChatScreen({ route, navigation }) {
   useEffect(() => {
     signin();
     getMessages(roomId);
-  }, []);
+    if (isFocused) {
+      intervalRef.current = setInterval(() => {
+        handleChatVisible(roomId);
+      }, 2500);
+    } else {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+      // 退出するときに自分の情報を部屋から削除
+      remove('rooms/' + roomId + '/position/' + userId + '/');
+    }
+  }, [isFocused]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -176,46 +225,48 @@ export default function ChatScreen({ route, navigation }) {
           keyExtractor={(item, index) => index.toString()}
           numColumns={4}
           renderItem={({ item }) => (
-            <React.Fragment>
-              <TouchableOpacity onPress={() => handleItemPress(item, userId)}>
-                {item.userId ? (
-                  <React.Fragment>
-                    <View
-                      style={[
-                        styles.triangle,
-                        { transform: [{ translateX: -50 }] },
-                      ]}
-                    />
-                    <View style={styles.chatTextView}>
-                      {Math.abs(item.x - myPlace.x) <= 1 &&
-                      Math.abs(item.y - myPlace.y) <= 1 ? (
-                        <Text
-                          style={{
-                            fontSize: RFPercentage(1.5),
-                          }}
-                        >
-                          {levelingChatText(item.text)}
-                        </Text>
-                      ) : (
-                        <Text
-                          style={{
-                            fontSize: RFPercentage(1.5),
-                          }}
-                        >
-                          •••
-                        </Text>
-                      )}
-                    </View>
-                    <Image
-                      style={styles.imageStyle}
-                      source={require(userIconUrl)}
-                    />
-                  </React.Fragment>
-                ) : (
-                  <Image style={styles.imageStyle} source={null} />
-                )}
-              </TouchableOpacity>
-            </React.Fragment>
+            <TouchableOpacity onPress={() => handleItemPress(item, userId)}>
+              {item.userId ? (
+                <React.Fragment>
+                  {item.chatVisible && (
+                    <React.Fragment>
+                      <View
+                        style={[
+                          styles.triangle,
+                          { transform: [{ translateX: -50 }] },
+                        ]}
+                      />
+                      <View style={styles.chatTextView}>
+                        {Math.abs(item.x - myPlace.x) <= 1 &&
+                        Math.abs(item.y - myPlace.y) <= 1 ? (
+                          <Text
+                            style={{
+                              fontSize: RFPercentage(1.5),
+                            }}
+                          >
+                            {levelingChatText(item.text)}
+                          </Text>
+                        ) : (
+                          <Text
+                            style={{
+                              fontSize: RFPercentage(1.5),
+                            }}
+                          >
+                            •••
+                          </Text>
+                        )}
+                      </View>
+                    </React.Fragment>
+                  )}
+                  <Image
+                    style={styles.imageStyle}
+                    source={require(userIconUrl)}
+                  />
+                </React.Fragment>
+              ) : (
+                <Image style={styles.imageStyle} source={null} />
+              )}
+            </TouchableOpacity>
           )}
         />
         <View style={styles.inputTextContainer}>
@@ -305,7 +356,7 @@ const styles = StyleSheet.create({
   triangle: {
     position: 'absolute',
     top: '20%',
-    left: '97%',
+    left: '100%',
     width: 0,
     height: 0,
     borderTopWidth: 10,

@@ -1,7 +1,7 @@
 import {
-    NavigationContainer,
-    DefaultTheme,
-    DarkTheme,
+  NavigationContainer,
+  DefaultTheme,
+  DarkTheme,
 } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as React from 'react';
@@ -18,11 +18,11 @@ import LinkingConfiguration from './LinkingConfiguration';
 // If you are not familiar with React Navigation, we recommend going through the
 // "Fundamentals" guide: https://reactnavigation.org/docs/getting-started
 export default function Navigation() {
-    return (
-        <NavigationContainer linking={LinkingConfiguration}>
-            <RootNavigator />
-        </NavigationContainer>
-    );
+  return (
+    <NavigationContainer linking={LinkingConfiguration}>
+      <RootNavigator />
+    </NavigationContainer>
+  );
 }
 
 // A root stack navigator is often used for displaying modals on top of all other content
@@ -30,18 +30,34 @@ export default function Navigation() {
 const Stack = createStackNavigator<RootStackParamList>();
 
 const RootNavigator = () => (
-    <Stack.Navigator
-        initialRouteName="InitializeStart"
-        screenOptions={{ headerShown: false }}
-    >
-        <Stack.Screen name="Root" component={Navigator} />
-        <Stack.Screen name="InitializeStart" component={InitializeStart} />
-        <Stack.Screen name="InitializeWelcome" component={InitializeWelcome} />
-        <Stack.Screen name="InitializeLogin" component={InitializeLogin} />
-        <Stack.Screen
-            name="NotFound"
-            component={NotFoundScreen}
-            options={{ title: 'Oops!' }}
-        />
-    </Stack.Navigator>
+  <Stack.Navigator
+    initialRouteName="InitializeStart"
+    screenOptions={{ headerShown: true }}
+  >
+    <Stack.Screen
+      name="Root"
+      component={Navigator}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="InitializeStart"
+      component={InitializeStart}
+      options={{ headerShown: false, title: '' }}
+    />
+    <Stack.Screen
+      name="InitializeWelcome"
+      component={InitializeWelcome}
+      options={{ title: '新規登録' }}
+    />
+    <Stack.Screen
+      name="InitializeLogin"
+      component={InitializeLogin}
+      options={{ title: 'ログイン' }}
+    />
+    <Stack.Screen
+      name="NotFound"
+      component={NotFoundScreen}
+      options={{ title: 'Oops!' }}
+    />
+  </Stack.Navigator>
 );

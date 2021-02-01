@@ -1,11 +1,23 @@
 import * as WebBrowser from 'expo-web-browser';
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, TouchableOpacity, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { getUserId } from '../lib/firebase';
 import { Colors } from '../components/styles/utils';
 
 export default function InitializeStart({ navigation }) {
+  const [userId, setUserId] = useState<string>('');
+
+  const signin = async () => {
+    const uid = await getUserId();
+    setUserId(uid);
+  };
+
+  useEffect(() => {
+    // signin();
+  });
+
   return (
     <View style={styles.containerStyle}>
       <View style={styles.topSectionStyle}>

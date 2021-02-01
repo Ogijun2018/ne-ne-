@@ -68,10 +68,20 @@ export const setNewCollection = async (
     });
 };
 
-export const getUserId = async () => {
-  const userCredential = await firebase.auth().signInAnonymously();
+export const getUserId = async (email, password) => {
+  const userCredential = await firebase
+    .auth()
+    .signInWithEmailAndPassword(email, password)
+    .then(({ user }) => {
+      return { uid: user?.uid, success: true };
+    })
+    .catch((error) => {
+      return { uid: null, success: false };
+    });
+};
 
-  return userCredential.user?.uid;
+export const remove = async (ref) => {
+  return firebase.database().ref(ref).remove();
 };
 
 export const login = (email, password) => {
@@ -79,12 +89,12 @@ export const login = (email, password) => {
     .auth()
     .signInWithEmailAndPassword(email, password)
     .then(({ user }) => {
-      return { user };
+      return { user, success: true };
     })
     .catch((error) => {
       console.log('error at firebase login', error);
 
-      return { error };
+      return { error, success: false };
     });
 };
 
@@ -111,12 +121,12 @@ export const signup = (email, password) => {
     .auth()
     .createUserWithEmailAndPassword(email, password)
     .then(({ user }) => {
-      return { user };
+      return { user, success: true };
     })
     .catch((error) => {
       console.log('error at firebase signup', error);
 
-      return { error };
+      return { success: false };
     });
 };
 
