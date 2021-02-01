@@ -1,17 +1,22 @@
 export type RootStackParamList = {
-  Root: undefined;
-  NotFound: undefined;
+    Root: undefined;
+    InitializeStart: undefined;
+    InitializeLogin: undefined;
+    InitializeWelcome: undefined;
+    NotFound: undefined;
 };
 
 export type BottomTabParamList = {
-  TabOne: undefined;
-  TabTwo: undefined;
+    MainHome: undefined;
+    MainSettings: undefined;
 };
 
-export type TabOneParamList = {
-  TabOneScreen: undefined;
+export type MainHomeParamList = {
+    NewClass: undefined;
+    Chat: undefined;
 };
 
-export type TabTwoParamList = {
-  TabTwoScreen: undefined;
+export type ChatParamList = {
+    Chat: undefined;
+    UserInfo: undefined;
 };

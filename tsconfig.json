@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "sourceMap": true,
+    "target": "es5",
+    "module": "es2015",
     "allowSyntheticDefaultImports": true,
     "jsx": "react-native",
     "lib": ["dom", "esnext"],

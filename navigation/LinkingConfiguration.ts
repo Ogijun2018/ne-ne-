@@ -6,14 +6,32 @@ export default {
     screens: {
       Root: {
         screens: {
-          TabOne: {
+          MainHome: {
             screens: {
-              TabOneScreen: 'one',
+              MainHome: 'MainHome',
             },
           },
-          TabTwo: {
+          MainSettings: {
             screens: {
-              TabTwoScreen: 'two',
+              MainSettings: 'MainSettings',
+            },
+          },
+        },
+      },
+      InitializeStart: {
+        screens: {
+          InitializeStart: {
+            screens: {
+              InitializeStart: 'InitializeStart',
+            },
+          },
+        },
+      },
+      InitializeWelcome: {
+        screens: {
+          InitializeWelcome: {
+            screens: {
+              InitializeWelcome: 'InitializeWelcome',
             },
           },
         },
