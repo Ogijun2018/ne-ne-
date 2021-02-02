@@ -21,12 +21,16 @@ export default function Navigator() {
   return (
     <BottomTab.Navigator
       initialRouteName="MainHome"
-      tabBarOptions={{ activeTintColor: Colors[colorScheme].tint }}
+      tabBarOptions={{
+        activeTintColor: '#2f95dc',
+        keyboardHidesTabBar: true,
+      }}
     >
       <BottomTab.Screen
         name="MainHome"
         component={MainHomeNavigator}
         options={{
+          title: 'Home',
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="home-sharp" color={color} />
           ),
@@ -36,6 +40,7 @@ export default function Navigator() {
         name="MainSettings"
         component={MainSettings}
         options={{
+          title: 'Settings',
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="settings-sharp" color={color} />
           ),

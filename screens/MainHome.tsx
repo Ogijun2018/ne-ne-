@@ -6,12 +6,14 @@ import {
   View,
   SafeAreaView,
   Image,
+  Alert,
 } from 'react-native';
 import { Classes } from '../types/classes';
 import * as firebase from 'firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FlatList } from 'react-native-gesture-handler';
 import { useIsFocused } from '@react-navigation/native';
+import { remove as firebaseRemove, remove } from '../lib/firebase';
 
 export default function MainHome({ navigation }: { navigation: any }, ref) {
   const [classes, setClasses] = useState();
@@ -44,6 +46,12 @@ export default function MainHome({ navigation }: { navigation: any }, ref) {
   const getIcon = async () => {
     const imageUrl = await AsyncStorage.getItem('profileImage');
     setImageUrl(imageUrl);
+  };
+
+  const removeClass = async (roomId: string) => {
+    const uid = await AsyncStorage.getItem('uid');
+    await firebaseRemove('/users/' + uid + '/classes/' + roomId + '/');
+    navigation.push('MainHomeScreen');
   };
 
   useEffect(() => {
@@ -90,35 +98,63 @@ export default function MainHome({ navigation }: { navigation: any }, ref) {
           keyExtractor={(item) => item.key}
           renderItem={({ item }) => {
             return (
-              <TouchableOpacity
-                style={{
-                  borderWidth: 1,
-                  borderRadius: 5,
-                  borderColor: '#33A3F2',
-                  backgroundColor: '#2f95dc',
-                  height: 50,
-                  justifyContent: 'center',
-                  paddingLeft: 10,
-                  marginVertical: 5,
-                  marginHorizontal: 20,
-                }}
-                onPress={() => {
-                  navigation.navigate('ChatNavigator', {
-                    screen: 'ChatScreen',
-                    params: {
-                      roomId: item.roomId,
-                      roomName: item.name,
-                    },
-                  });
-                }}
-              >
-                <Text
-                  style={{ fontSize: 18, color: 'white', fontWeight: 'bold' }}
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity
+                  style={{
+                    borderWidth: 1,
+                    borderRadius: 5,
+                    borderColor: '#33A3F2',
+                    backgroundColor: '#2f95dc',
+                    height: 55,
+                    justifyContent: 'center',
+                    paddingLeft: 10,
+                    marginVertical: 5,
+                    marginHorizontal: 10,
+                    width: '80%',
+                  }}
+                  onPress={() => {
+                    navigation.navigate('ChatNavigator', {
+                      screen: 'ChatScreen',
+                      params: {
+                        roomId: item.roomId,
+                        roomName: item.name,
+                      },
+                    });
+                  }}
                 >
-                  {item.schoolName} {days[item.day]}
-                  {item.time}限 {item.name}
-                </Text>
-              </TouchableOpacity>
+                  <Text
+                    style={{ fontSize: 18, color: 'white', fontWeight: 'bold' }}
+                  >
+                    {item.schoolName} {days[item.day]}
+                    {item.time}限{'\n'}
+                    {item.name}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: '#B00020',
+                    width: '10%',
+                    height: 55,
+                    borderRadius: 5,
+                    marginVertical: 5,
+                  }}
+                  onPress={() => {
+                    Alert.alert('本当に削除しますか？', '', [
+                      { text: 'はい', onPress: () => removeClass(item.roomId) },
+                      {
+                        text: 'いいえ',
+                        onPress: () => {
+                          return;
+                        },
+                      },
+                    ]);
+                  }}
+                >
+                  <Text style={{ color: 'white' }}>削除</Text>
+                </TouchableOpacity>
+              </View>
             );
           }}
         />

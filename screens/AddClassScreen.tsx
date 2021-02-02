@@ -48,7 +48,7 @@ export default function AddClassScreen({ navigation }) {
     if (!result.success) {
       Alert.alert('科目の登録に失敗しました。');
     } else {
-      navigation.navigate('NewClassNavigator');
+      navigation.navigate('MainHomeScreen');
     }
   };
 
@@ -83,7 +83,7 @@ export default function AddClassScreen({ navigation }) {
                 borderRadius: 5,
                 borderColor: '#33A3F2',
                 backgroundColor: '#2f95dc',
-                height: 50,
+                height: 55,
                 justifyContent: 'center',
                 paddingLeft: 10,
                 marginVertical: 5,
@@ -97,7 +97,8 @@ export default function AddClassScreen({ navigation }) {
                 style={{ fontSize: 18, color: 'white', fontWeight: 'bold' }}
               >
                 {item.schoolName} {days[item.day]}
-                {item.time}限 {item.name}
+                {item.time}限{'\n'}
+                {item.name}
               </Text>
             </TouchableOpacity>
           );

@@ -55,7 +55,10 @@ export default function InitializeWelcome({ navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={63}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : null}
+      keyboardVerticalOffset={63}
+    >
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{ paddingBottom: 50 }}>
           <Text

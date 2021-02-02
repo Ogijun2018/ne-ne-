@@ -302,7 +302,7 @@ export default function ChatScreen({ route, navigation }) {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={{ flex: 1.5 }}
-        behavior="padding"
+        behavior={Platform.OS === 'ios' ? 'padding' : null}
         keyboardVerticalOffset={63}
       >
         <FlatList

@@ -6,6 +6,7 @@ import {
   View,
   TextInput,
   Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { set as firebaseSet, generateClassRoomId } from '../lib/firebase';
 import { Picker } from '@react-native-picker/picker';
@@ -18,7 +19,11 @@ export default function RegistClassScreen({ navigation }) {
   const [time, onChangeTime] = useState(1);
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior="padding"
+      keyboardVerticalOffset={50}
+    >
       <Picker
         selectedValue={schoolName}
         style={{
@@ -78,7 +83,7 @@ export default function RegistClassScreen({ navigation }) {
         </Picker>
         <Text style={{ alignSelf: 'center', fontSize: 15 }}>限</Text>
       </View>
-      <View style={{ width: '75%', paddingTop: 10 }}>
+      <View style={{ width: '75%' }}>
         <TextInput
           onChangeText={(text) => onChangeClassName(text)}
           value={className}
@@ -99,7 +104,7 @@ export default function RegistClassScreen({ navigation }) {
       >
         <Text style={styles.submitButtonText}>OK</Text>
       </TouchableOpacity>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -130,7 +135,6 @@ async function registNewClass(navigation, schoolName, day, time, name) {
   } else {
     navigation.navigate('MainHomeScreen');
   }
-  // navigation.navigate('NewClassNavigator');
 }
 
 const styles = StyleSheet.create({
