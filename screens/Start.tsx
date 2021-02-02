@@ -1,23 +1,8 @@
-import * as WebBrowser from 'expo-web-browser';
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { StyleSheet, TouchableOpacity, Text, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { getUserId } from '../lib/firebase';
 import { Colors } from '../components/styles/utils';
 
 export default function InitializeStart({ navigation }) {
-  const [userId, setUserId] = useState<string>('');
-
-  const signin = async () => {
-    const uid = await getUserId();
-    setUserId(uid);
-  };
-
-  useEffect(() => {
-    // signin();
-  });
-
   return (
     <View style={styles.containerStyle}>
       <View style={styles.topSectionStyle}>
@@ -29,27 +14,13 @@ export default function InitializeStart({ navigation }) {
 
       <View style={styles.buttonSectionStyle}>
         <TouchableOpacity
-          style={{
-            width: '75%',
-            height: 60,
-            backgroundColor: '#2f95dc',
-            justifyContent: 'center',
-            borderRadius: 50,
-            margin: 10,
-          }}
+          style={[styles.buttonContainerStyle, { backgroundColor: '#2f95dc' }]}
           onPress={() => navigation.navigate('InitializeWelcome')}
         >
           <Text style={styles.buttonStyle}>新規登録</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={{
-            width: '75%',
-            height: 60,
-            backgroundColor: '#a9a9a9',
-            justifyContent: 'center',
-            borderRadius: 50,
-            margin: 10,
-          }}
+          style={[styles.buttonContainerStyle, { backgroundColor: '#a9a9a9' }]}
           onPress={() => navigation.navigate('InitializeLogin')}
         >
           <Text style={styles.buttonStyle}>ログイン</Text>
@@ -59,10 +30,6 @@ export default function InitializeStart({ navigation }) {
   );
 }
 
-const constants = {
-  TOP_SECTION_HEIGHT: 298,
-};
-
 const styles = StyleSheet.create({
   containerStyle: {
     width: '100%',
@@ -70,7 +37,13 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
   },
-
+  buttonContainerStyle: {
+    width: '75%',
+    height: 60,
+    justifyContent: 'center',
+    borderRadius: 50,
+    margin: 10,
+  },
   topSectionStyle: {
     width: '100%',
     display: 'flex',

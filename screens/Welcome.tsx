@@ -8,11 +8,9 @@ import {
   View,
   TextInput,
   Platform,
-  Button,
   Image,
   KeyboardAvoidingView,
 } from 'react-native';
-// import TextInput from '../components/atoms/TextInput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signup as firebaseSignup, set as firebaseSet } from '../lib/firebase';
 import * as ImagePicker from 'expo-image-picker';
@@ -111,7 +109,6 @@ export default function InitializeWelcome({ navigation }) {
             marginBottom: 20,
             justifyContent: 'space-evenly',
             alignItems: 'center',
-            // backgroundColor: 'blue',
             width: '75%',
           }}
         >
