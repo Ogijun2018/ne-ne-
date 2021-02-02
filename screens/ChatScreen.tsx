@@ -13,19 +13,21 @@ import {
   Dimensions,
   TouchableOpacity,
   KeyboardAvoidingView,
+  Modal,
 } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, FontAwesome5, AntDesign } from '@expo/vector-icons';
 import { RFPercentage } from 'react-native-responsive-fontsize';
-import firebase, { database } from 'firebase';
+import firebase from 'firebase';
 import {
+  getMessageDBRef,
   getMessageRef,
-  getUserId,
   getUserPositionRef,
   remove,
 } from '../lib/firebase';
 import { Position } from '../types/message';
 import { useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import moment from 'moment';
 const ITEM_WIDTH = Dimensions.get('window').width;
 
 export default function ChatScreen({ route, navigation }) {
@@ -36,7 +38,11 @@ export default function ChatScreen({ route, navigation }) {
   const [myPlace, setMyPlace] = useState([]);
   const [text, setText] = useState<string>('');
   const [userId, setUserId] = useState<string>('');
+  const [imageUrl, setImageUrl] = useState();
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const userIconUrl = '../assets/images/sample_user_icon.png';
+  const [userInfoState, setUserInfoState] = useState();
+  const [userChatHistoryState, setUserChatHistoryState] = useState();
 
   const seats = [
     { x: 0, y: 0, id: 1 },
@@ -67,8 +73,18 @@ export default function ChatScreen({ route, navigation }) {
 
   let copySeats = [];
 
+  const openModal = () => {
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    // setUserInfoState();
+  };
+
   const sendMessage = async (value: string, roomId: string) => {
     if (value != '') {
+      // positionの方のチャット追加
       const docRef = await getMessageRef(roomId, userId);
       const newMessage = {
         createdAt: Date.now(),
@@ -76,6 +92,15 @@ export default function ChatScreen({ route, navigation }) {
         chatVisible: true,
       };
       await docRef.update(newMessage);
+
+      // chatの方のチャット追加 一時的なDBとして置いておく
+      const docRefChat = await getMessageDBRef(roomId, userId);
+      const newChatMessage = {
+        createdAt: Date.now(),
+        text: value,
+      };
+      await docRefChat.push(newChatMessage);
+
       setText('');
     } else {
       Alert.alert('エラー', 'メッセージを入力してください');
@@ -101,6 +126,7 @@ export default function ChatScreen({ route, navigation }) {
             y: keys[i].y,
             createdAt: keys[i].createdAt,
             chatVisible: keys[i].chatVisible,
+            icon: keys[i].icon,
           });
         }
         // Deep copy
@@ -113,6 +139,7 @@ export default function ChatScreen({ route, navigation }) {
               seat.userId = param.userId;
               seat.createdAt = param.createdAt;
               seat.chatVisible = param.chatVisible;
+              seat.icon = param.icon;
             }
           });
         });
@@ -124,10 +151,12 @@ export default function ChatScreen({ route, navigation }) {
     roomId: string,
     position: { x: number; y: number },
     uid: string,
+    icon: string,
   ) => {
     const ref = await getUserPositionRef(roomId, uid);
     const newPosition = {
       userId: uid,
+      icon: icon,
       x: position.x,
       y: position.y,
     } as Position;
@@ -137,10 +166,12 @@ export default function ChatScreen({ route, navigation }) {
   const handleItemPress = (item: { x: number; y: number; userId: string }) => {
     if (item.userId) {
       // ユーザーがいたら詳細画面へ飛ぶ
-      navigation.navigate('UserInfoScreen');
+      getUserInfo(item.userId);
+      getUserChatHistory(item.userId);
+      openModal();
     } else {
       // ユーザーがいなかったら席の移動
-      sendUserPosition(roomId, item, userId);
+      sendUserPosition(roomId, item, userId, imageUrl);
       setMyPlace({ x: item.x, y: item.y });
     }
   };
@@ -176,6 +207,8 @@ export default function ChatScreen({ route, navigation }) {
   const signin = async () => {
     const uid = await AsyncStorage.getItem('uid');
     setUserId(uid);
+    const imageUrl = await AsyncStorage.getItem('profileImage');
+    setImageUrl(imageUrl);
   };
 
   const levelingChatText = (text) => {
@@ -197,6 +230,58 @@ export default function ChatScreen({ route, navigation }) {
     }
   };
 
+  const getUserInfo = async (userId: string) => {
+    await firebase
+      .database()
+      .ref('/users/' + userId + '/')
+      .once('value', (snapshot) => {
+        setUserInfoState(snapshot.val());
+      });
+  };
+
+  const getUserChatHistory = async (userId: string) => {
+    await firebase
+      .database()
+      .ref('/rooms/' + roomId + '/chat/' + userId + '/')
+      .orderByChild('createdAt')
+      .once('value', (snapshot) => {
+        const keys = [];
+        snapshot.forEach((item) => {
+          const itemVal = item.val();
+          keys.push(itemVal);
+        });
+        setUserChatHistoryState(keys);
+      });
+  };
+
+  const renderChatHistory = ({ item }) => {
+    const tempTime = moment(item.createdAt);
+
+    return (
+      <View style={{ flexDirection: 'row', height: 40 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingLeft: 10,
+          }}
+        >
+          <Text
+            style={{
+              width: 60,
+              fontSize: 15,
+              color: 'gray',
+            }}
+          >
+            {tempTime.format('hh:mm')}
+          </Text>
+          <Text style={{ fontSize: 15, width: '75%' }}>{item.text}</Text>
+        </View>
+      </View>
+    );
+  };
+
   useEffect(() => {
     signin();
     getMessages(roomId);
@@ -209,6 +294,7 @@ export default function ChatScreen({ route, navigation }) {
       intervalRef.current = null;
       // 退出するときに自分の情報を部屋から削除
       remove('rooms/' + roomId + '/position/' + userId + '/');
+      remove('rooms/' + roomId + '/chat/' + userId + '/');
     }
   }, [isFocused]);
 
@@ -258,10 +344,23 @@ export default function ChatScreen({ route, navigation }) {
                       </View>
                     </React.Fragment>
                   )}
-                  <Image
-                    style={styles.imageStyle}
-                    source={require(userIconUrl)}
-                  />
+                  {item.icon ? (
+                    <View style={styles.imageStyle}>
+                      <Image
+                        style={{
+                          width: ITEM_WIDTH / 7 - 2,
+                          height: ITEM_WIDTH / 6 - 7,
+                          borderRadius: 100,
+                        }}
+                        source={{ uri: item.icon }}
+                      />
+                    </View>
+                  ) : (
+                    <Image
+                      style={styles.imageStyle}
+                      source={require(userIconUrl)}
+                    />
+                  )}
                 </React.Fragment>
               ) : (
                 <Image style={styles.imageStyle} source={null} />
@@ -269,6 +368,135 @@ export default function ChatScreen({ route, navigation }) {
             </TouchableOpacity>
           )}
         />
+        <Modal
+          visible={modalVisible}
+          animationType={'slide'}
+          onRequestClose={() => closeModal()}
+        >
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              onPress={() => closeModal()}
+              style={{
+                position: 'absolute',
+                top: 40,
+                left: 20,
+                width: 50,
+                height: 50,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <AntDesign name="closecircleo" size={40} color={'black'} />
+            </TouchableOpacity>
+            {userInfoState ? (
+              <React.Fragment>
+                <View
+                  style={{
+                    display: 'flex',
+                    flex: 4.5,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  {userInfoState.imageUrl ? (
+                    <Image
+                      source={{ uri: userInfoState.imageUrl }}
+                      style={{
+                        width: 100,
+                        height: 100,
+                        borderRadius: 100,
+                        marginTop: 20,
+                      }}
+                    />
+                  ) : (
+                    <Image
+                      source={require(userIconUrl)}
+                      style={{ width: 60, height: 60, marginTop: 10 }}
+                    />
+                  )}
+                  <Text
+                    style={{ fontSize: 35, fontWeight: 'bold', paddingTop: 10 }}
+                  >
+                    {userInfoState.name}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    display: 'flex',
+                    flex: 1,
+                    flexDirection: 'row',
+                    backgroundColor: '#EBF8FF',
+                    width: '75%',
+                    borderRadius: 5,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <FontAwesome5 name="school" color={'#2f95dc'} size={20} />
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      paddingHorizontal: 20,
+                    }}
+                  >
+                    <Text style={{ fontSize: 15, fontWeight: '500' }}>
+                      {userInfoState.school}
+                    </Text>
+                    <Text>{userInfoState.belong}</Text>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    backgroundColor: '#EBF8FF',
+                    width: '75%',
+                    // padding: 20,
+                    borderRadius: 5,
+                    marginTop: 10,
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <FontAwesome5 name="twitter" color={'#2f95dc'} size={20} />
+                  <View
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      paddingHorizontal: 20,
+                    }}
+                  >
+                    <Text style={{ fontSize: 15, fontWeight: '500' }}>
+                      @ {userInfoState.snsAccount}
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    display: 'flex',
+                    flex: 7,
+                    width: '95%',
+                    backgroundColor: '#EBF8FF',
+                    marginTop: 10,
+                    marginBottom: 50,
+                    borderRadius: 5,
+                  }}
+                >
+                  <FlatList
+                    keyExtractor={(item, index) => index}
+                    data={userChatHistoryState}
+                    renderItem={renderChatHistory}
+                  />
+                </View>
+              </React.Fragment>
+            ) : (
+              <Text>読み込み中…</Text>
+            )}
+          </View>
+        </Modal>
         <View style={styles.inputTextContainer}>
           <TextInput
             style={styles.inputText}
@@ -313,6 +541,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignContent: 'center',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   flatListContainerStyle: {
     paddingTop: 50,

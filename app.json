@@ -19,13 +19,21 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "NSCameraUsageDescription": "写真をアップロードするためにカメラを使用します",
+        "NSPhotoLibraryUsageDescription": "アカウント画像をアップロードするためにフォトライブラリを使用します",
+        "NSMicrophoneUsageDescription": "マイクの使用を許可します"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "versionCode": 1,
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE"]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"

@@ -1,91 +1,122 @@
-import * as WebBrowser from 'expo-web-browser';
-import React from 'react';
-import { StyleSheet, TouchableOpacity, Text, View } from 'react-native';
-import TextInput from '../components/atoms/TextInput';
-import { signup as firebaseSignup } from '../lib/firebase';
+import React, { useState, useEffect } from 'react';
+import firebase, { database } from 'firebase';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import { FontAwesome5 } from '@expo/vector-icons';
 
-export default function UserInfoScreen({ navigation }) {
-    const [name, onChangeName] = React.useState('');
-    const [school, onChangeSchool] = React.useState('');
-    const [belong, onChangeBelong] = React.useState('');
-    const [snsAccount, onChangeSnsAccount] = React.useState('');
-    const [email, onChangeEmail] = React.useState('');
-    const [password, onChangePass] = React.useState('');
+export default function UserInfoScreen({ route, navigation }) {
+  const { userId, roomId } = route.params;
+  const [state, setState] = useState();
+  const [chatHistory, setChatHistory] = useState();
+  const userIconUrl = '../assets/images/sample_user_icon.png';
 
-    return (
-        <View style={styles.container}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
-                ユーザーの詳細を表示する画面
-            </Text>
-        </View>
-    );
-}
+  const getChatHistory = async (userId: string) => {
+    await firebase
+      .database()
+      .ref('/rooms/' + roomId + '/chat/' + userId + '/')
+      .once('value', (snapshot) => {
+        setState(snapshot.val());
+      });
+  };
 
-async function registUser(navigation, email, password) {
-    await firebaseSignup(email, password);
-    navigation.navigate('Root');
+  const getUserInformation = async (userId: string) => {
+    await firebase
+      .database()
+      .ref('/users/' + userId + '/')
+      .once('value', (snapshot) => {
+        setState(snapshot.val());
+      });
+  };
+
+  useEffect(() => {
+    getUserInformation(userId);
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      {state ? (
+        <React.Fragment>
+          {state.imageUrl ? (
+            <Image
+              source={{ uri: state.imageUrl }}
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 100,
+                marginTop: 10,
+              }}
+            />
+          ) : (
+            <Image
+              source={require(userIconUrl)}
+              style={{ width: 60, height: 60, marginTop: 10 }}
+            />
+          )}
+          <Text style={{ fontSize: 40, fontWeight: 'bold' }}>{state.name}</Text>
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              backgroundColor: '#EBF8FF',
+              width: '75%',
+              padding: 20,
+              borderRadius: 5,
+              marginTop: 10,
+            }}
+          >
+            <FontAwesome5 name="school" color={'#2f95dc'} size={30} />
+            <View
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                paddingHorizontal: 20,
+              }}
+            >
+              <Text style={{ fontSize: 20, fontWeight: '500' }}>
+                {state.school}
+              </Text>
+              <Text>{state.belong}</Text>
+            </View>
+          </View>
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              backgroundColor: '#EBF8FF',
+              width: '75%',
+              padding: 20,
+              borderRadius: 5,
+              marginTop: 10,
+            }}
+          >
+            <FontAwesome5 name="twitter" color={'#2f95dc'} size={30} />
+            <View
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                paddingHorizontal: 20,
+              }}
+            >
+              <Text style={{ fontSize: 20, fontWeight: '500' }}>
+                @ {state.snsAccount}
+              </Text>
+            </View>
+          </View>
+        </React.Fragment>
+      ) : (
+        <Text>読み込み中…</Text>
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        paddingTop: 100,
-    },
-    developmentModeText: {
-        marginBottom: 20,
-        fontSize: 14,
-        lineHeight: 19,
-        textAlign: 'center',
-    },
-    contentContainer: {
-        paddingTop: 30,
-    },
-    welcomeContainer: {
-        alignItems: 'center',
-        marginTop: 10,
-        marginBottom: 20,
-    },
-    welcomeImage: {
-        width: 100,
-        height: 80,
-        resizeMode: 'contain',
-        marginTop: 3,
-        marginLeft: -10,
-    },
-    getStartedContainer: {
-        alignItems: 'center',
-        marginHorizontal: 50,
-    },
-    homeScreenFilename: {
-        marginVertical: 7,
-    },
-    codeHighlightText: {
-        color: 'rgba(96,100,109, 0.8)',
-    },
-    codeHighlightContainer: {
-        borderRadius: 3,
-        paddingHorizontal: 4,
-    },
-    getStartedText: {
-        fontSize: 17,
-        lineHeight: 24,
-        textAlign: 'center',
-    },
-    helpContainer: {
-        marginTop: 15,
-        marginHorizontal: 20,
-        alignItems: 'center',
-    },
-    helpLink: {
-        paddingVertical: 15,
-    },
-    helpLinkText: {
-        textAlign: 'center',
-    },
-    submitButton: {
-        width: 200,
-        height: 100,
-        backgroundColor: 'gray',
-    },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    height: '100%',
+    // justifyContent: 'center',
+    alignItems: 'center',
+    // paddingTop: 100,
+  },
 });

@@ -37,35 +37,16 @@ export const getMessageRef: PositionRef = async (
     .ref('rooms/' + roomId + '/position/' + userId + '/');
 };
 
+export const getMessageDBRef = async (roomId: string, userId: string) => {
+  return await firebase
+    .database()
+    .ref('rooms/' + roomId + '/chat/' + userId + '/');
+};
+
 export const getUserPositionRef = async (roomId: string, uid: string) => {
   return await firebase
     .database()
     .ref('rooms/' + roomId + '/position/' + uid + '/');
-};
-
-export const setNewCollection = async (
-  schoolName: string,
-  day: string,
-  time: string,
-  className: string,
-) => {
-  console.log('新しいコレクションを作成する');
-  await firebase
-    .firestore()
-    .collection('schools')
-    .doc(schoolName)
-    .collection(day)
-    .doc(time)
-    .set({
-      name: className,
-      country: 'Japan',
-    })
-    .then(() => {
-      return { success: true };
-    })
-    .catch((e) => {
-      console.log('error' + e);
-    });
 };
 
 export const getUserId = async (email, password) => {
@@ -229,14 +210,14 @@ export const upload = async (ref, uri) => {
     const snapshot = await refUpload.put(uri, {
       contentType: 'image/jpeg',
     });
-    console.log('result at firebase storage upload', snapshot);
+    // console.log('result at firebase storage upload', snapshot);
 
     const downloadURL = await refUpload.getDownloadURL();
 
-    return { downloadURL };
+    return { downloadURL, success: true };
   } catch (error) {
-    console.log('error at firebase storage upload', error);
+    // console.log('error at firebase storage upload', error);
 
-    return { error };
+    return { error, success: false };
   }
 };

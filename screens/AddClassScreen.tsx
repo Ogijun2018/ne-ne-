@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
-  Button,
   FlatList,
   Text,
   TouchableOpacity,
   Alert,
   SafeAreaView,
 } from 'react-native';
-import { setNewCollection, set as firebaseSet } from '../lib/firebase';
+import { set as firebaseSet } from '../lib/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as firebase from 'firebase';
 import 'firebase/firestore';
@@ -68,6 +67,9 @@ export default function AddClassScreen({ navigation }) {
         }}
       >
         Add Classes
+      </Text>
+      <Text style={{ paddingLeft: 25, fontSize: 15, paddingBottom: 10 }}>
+        登録済みの授業を追加できます。
       </Text>
       <FlatList
         style={{ width: '100%' }}
