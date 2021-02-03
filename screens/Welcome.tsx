@@ -247,7 +247,6 @@ async function registUser(
 
 const styles = StyleSheet.create({
   container: {
-    // height: '110%',
     backgroundColor: '#fff',
     alignItems: 'center',
   },
@@ -259,7 +258,6 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     paddingLeft: 10,
-    // backgroundColor: 'red',
   },
   developmentModeText: {
     marginBottom: 20,

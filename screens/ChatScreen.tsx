@@ -176,32 +176,11 @@ export default function ChatScreen({ route, navigation }) {
     }
   };
 
-  const handleChatVisible = async (roomId: string) => {
+  const hideChat = async (roomId: string) => {
     await firebase
       .database()
-      .ref('rooms/' + roomId + '/position/')
-      .once('value', (snapshot) => {
-        const keys = [];
-        snapshot.forEach((item) => {
-          const itemVal = item.val();
-          keys.push(itemVal);
-        });
-        for (let i = 0; i < keys.length; i++) {
-          if (
-            keys[i].createdAt &&
-            keys[i].chatVisible &&
-            keys[i].createdAt + 5000 <= Date.now()
-          ) {
-            const updatedData = {
-              chatVisible: false,
-            };
-            firebase
-              .database()
-              .ref('rooms/' + roomId + '/position/' + keys[i].userId + '/')
-              .update(updatedData);
-          }
-        }
-      });
+      .ref('rooms/' + roomId + '/position/' + userId)
+      .update({ chatVisible: false });
   };
 
   const signin = async () => {
@@ -285,13 +264,7 @@ export default function ChatScreen({ route, navigation }) {
   useEffect(() => {
     signin();
     getMessages(roomId);
-    if (isFocused) {
-      intervalRef.current = setInterval(() => {
-        handleChatVisible(roomId);
-      }, 2500);
-    } else {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+    if (!isFocused) {
       // 退出するときに自分の情報を部屋から削除
       remove('rooms/' + roomId + '/position/' + userId + '/');
       remove('rooms/' + roomId + '/chat/' + userId + '/');
@@ -513,6 +486,9 @@ export default function ChatScreen({ route, navigation }) {
           <TouchableOpacity
             onPress={() => {
               sendMessage(text, roomId);
+              setTimeout(() => {
+                hideChat(roomId);
+              }, 5000);
             }}
             style={{
               height: 50,
